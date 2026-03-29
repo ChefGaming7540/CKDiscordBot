@@ -1,0 +1,16 @@
+{
+  "name": "discord-crate-bot",
+  "version": "1.0.0",
+  "description": "A TF2-style crate opening Discord bot",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@discordjs/rest": "^2.3.0",
+    "better-sqlite3": "^9.4.3",
+    "discord-api-types": "^0.37.83",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.5"
+  }
+}
