@@ -89,6 +89,13 @@ function addKeys(userId, amount) {
   db.prepare('UPDATE users SET keys = keys + ? WHERE user_id = ?').run(amount, userId);
 }
 
+function removeKeys(userId, amount) {
+  const user = getUser(userId);
+  if (user.keys < amount) return false;
+  db.prepare('UPDATE users SET keys = keys - ? WHERE user_id = ?').run(amount, userId);
+  return true;
+}
+
 function addCrates(userId, amount) {
   getUser(userId);
   db.prepare('UPDATE users SET crates = crates + ? WHERE user_id = ?').run(amount, userId);
@@ -248,7 +255,7 @@ function getInventory(userId) {
 }
 
 module.exports = { 
-  getUser, addKeys, removeKey, setLastWork, setLastDaily, addXP, addSeasonXP, getSeasonLevel, getSeasonPassProgress,
+  getUser, addKeys, removeKeys, setLastWork, setLastDaily, addXP, addSeasonXP, getSeasonLevel, getSeasonPassProgress,
   equipItem, getEquippedItem, addCoins, removeCoins, addCrates, removeCrate,
   createTrade, getTrades, completeTrade, getLeaderboard, getDailyChallenge, updateChallengeProgress,
   addItem, getInventory 
