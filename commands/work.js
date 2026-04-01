@@ -65,27 +65,6 @@ module.exports = {
       });
     }
 
-    // Mini-game: Simple math question
-    const num1 = Math.floor(Math.random() * 10) + 1;
-    const num2 = Math.floor(Math.random() * 10) + 1;
-    const answer = num1 + num2;
-
-    const questionMessage = await interaction.reply({
-      content: `🧮 Quick math: What is ${num1} + ${num2}? **Reply to this message with just the number!** You have 10 seconds!`,
-      ephemeral: false,
-    });
-
-    const filter = (m) => m.author.id === userId && m.reference?.messageId === questionMessage.id;
-    try {
-      const collected = await interaction.channel.awaitMessages({ filter, max: 1, time: 10000, errors: ['time'] });
-      const userAnswer = parseInt(collected.first().content);
-      if (userAnswer !== answer) {
-        return interaction.followUp({ content: '❌ Wrong answer! Try again later.', ephemeral: true });
-      }
-    } catch {
-      return interaction.followUp({ content: '⏰ Time\'s up! Try again later.', ephemeral: true });
-    }
-
     // Calculate earnings with bonus
     const equipped = getEquippedItem(userId);
     const bonus = equipped ? getItemBonus(equipped.effect) : {};
@@ -103,7 +82,7 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setColor(0xf0c040)
       .setTitle(`💼 ${job.name} Complete!`)
-      .setDescription(`*${flavor}*\n\n🧠 You solved the math puzzle!`)
+      .setDescription(`*${flavor}*`)
       .addFields(
         { name: 'Earned', value: `+${earned} 🔑${bonus.workBoost ? ` (+${bonus.workBoost}% bonus)` : ''}`, inline: true },
         { name: 'XP Gained', value: `+${job.xp}`, inline: true },
@@ -113,6 +92,6 @@ module.exports = {
       .setFooter({ text: `Next work in ${job.cooldown / 3600000}h.` })
       .setTimestamp();
 
-    return interaction.editReply({ embeds: [embed] });
+    return interaction.reply({ embeds: [embed] });
   },
 };
