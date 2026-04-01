@@ -65,7 +65,31 @@ module.exports = {
       });
     }
 
-    // Calculate earnings with bonus
+    // Mini-game: Simple math question (addition)
+    const num1 = Math.floor(Math.random() * 10) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
+    const answer = num1 + num2;
+
+    const questionMessage = await interaction.reply({
+      content: `🧮 **Work quiz:** What is **${num1} + ${num2}**? Reply to this message with the number. You have **15 seconds**!`,
+      fetchReply: true,
+    });
+
+    const filter = (m) => m.author.id === userId && m.reference?.messageId === questionMessage.id;
+    let collected;
+
+    try {
+      collected = await interaction.channel.awaitMessages({ filter, max: 1, time: 15000, errors: ['time'] });
+    } catch {
+      return questionMessage.edit('⏰ Time is up! You did not answer in time. Try again later.');
+    }
+
+    const userAnswer = parseInt(collected.first().content);
+    if (Number.isNaN(userAnswer) || userAnswer !== answer) {
+      return questionMessage.edit('❌ Incorrect answer. Work failed this time. Try again in another cooldown.');
+    }
+
+    // success: award user
     const equipped = getEquippedItem(userId);
     const bonus = equipped ? getItemBonus(equipped.effect) : {};
     const baseEarned = Math.floor(Math.random() * (job.maxKeys - job.minKeys + 1)) + job.minKeys;
@@ -82,7 +106,7 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setColor(0xf0c040)
       .setTitle(`💼 ${job.name} Complete!`)
-      .setDescription(`*${flavor}*`)
+      .setDescription(`*${flavor}*\n\n🧠 You answered correctly!`)
       .addFields(
         { name: 'Earned', value: `+${earned} 🔑${bonus.workBoost ? ` (+${bonus.workBoost}% bonus)` : ''}`, inline: true },
         { name: 'XP Gained', value: `+${job.xp}`, inline: true },
@@ -92,6 +116,6 @@ module.exports = {
       .setFooter({ text: `Next work in ${job.cooldown / 3600000}h.` })
       .setTimestamp();
 
-    return interaction.reply({ embeds: [embed] });
+    return questionMessage.edit({ content: null, embeds: [embed] });
   },
 };
