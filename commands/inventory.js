@@ -65,6 +65,6 @@ module.exports = {
       .setFooter({ text: `Page ${clampedPage + 1} of ${totalPages}` })
       .setTimestamp();
 
-    return interaction.reply({ embeds: [embed], ephemeral: true });
+    return interaction.reply({ embeds: [embed], ephemeral: false });
   },
 };

@@ -30,6 +30,7 @@ const UNUSUAL_EFFECTS = [
   'Searing Plasma',
   'Nuts n\' Bolts',
   'Orbiting Planets',
+  'Heaven\'s Cooking',
 ];
 
 // ── Your items ────────────────────────────────────────────────────────────────
@@ -67,6 +68,7 @@ const ITEMS = [
   { name: 'Rustling Hat',       rarity: 'Unusual',   effect: 'random' },
   { name: 'Phantom Fedora',     rarity: 'Unusual',   effect: 'random' },
   { name: 'Glowing Helm',       rarity: 'Unusual',   effect: 'random' },
+  { name: 'Chef\'s Toque',      rarity: 'Unusual',   effect: 'random' },
 ];
 
 // ── Roll logic ────────────────────────────────────────────────────────────────
@@ -112,10 +114,11 @@ function openCrate() {
   const item   = pickItem(rarity);
   if (!item) return openCrate(); // re-roll if rarity pool is empty
 
+  const isChefToque = item.name === "Chef's Toque" && rarity === 'Unusual';
   const result = {
     name:         item.name,
     rarity,
-    effect:       rarity === 'Unusual' ? pickEffect() : null,
+    effect:       isChefToque ? "Heaven's Cooking" : (rarity === 'Unusual' ? pickEffect() : item.effect),
     rarityConfig: RARITIES[rarity],
   };
   return result;
