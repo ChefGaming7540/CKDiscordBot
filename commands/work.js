@@ -70,7 +70,7 @@ module.exports = {
     const answer = num1 + num2;
 
     await interaction.reply({
-      content: `🧮 Quick math: What is ${num1} + ${num2}? You have 10 seconds!`,
+      content: `🧮 Quick math: What is ${num1} + ${num2}? **Reply with just the number!** You have 10 seconds!`,
       ephemeral: true,
     });
 
