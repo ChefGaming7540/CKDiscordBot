@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { getUser, getDailyChallenge, addKeys, addXP } = require('../database');
+const { getUser, getDailyChallenge, addKeys, addXP, setLastDaily } = require('../database');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -14,8 +14,7 @@ module.exports = {
     // Check for daily reward
     if (now - user.last_daily > 24 * 60 * 60 * 1000) {
       addKeys(userId, 1);
-      // Update last_daily
-      require('../database').db.prepare('UPDATE users SET last_daily = ? WHERE user_id = ?').run(now, userId);
+      setLastDaily(userId);
       return interaction.reply({
         content: '🎁 Daily reward claimed! +1 🔑',
         ephemeral: true,

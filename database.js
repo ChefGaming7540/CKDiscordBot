@@ -6,6 +6,13 @@ const db = new Database(path.join(__dirname, 'crate_bot.db'));
 // Enable WAL mode for better performance
 db.pragma('journal_mode = WAL');
 
+function ensureColumn(table, column, definition) {
+  const columns = db.prepare(`PRAGMA table_info(${table})`).all();
+  if (!columns.some(x => x.name === column)) {
+    db.prepare(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`).run();
+  }
+}
+
 // Create tables
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
@@ -52,6 +59,14 @@ db.exec(`
   );
 `);
 
+// Ensure existing DB columns after first-run schema changes
+ensureColumn('users', 'xp', 'INTEGER NOT NULL DEFAULT 0');
+ensureColumn('users', 'level', 'INTEGER NOT NULL DEFAULT 1');
+ensureColumn('users', 'equipped_item', 'INTEGER');
+ensureColumn('users', 'streak', 'INTEGER NOT NULL DEFAULT 0');
+ensureColumn('users', 'last_daily', 'INTEGER NOT NULL DEFAULT 0');
+ensureColumn('inventory', 'equipped', 'INTEGER NOT NULL DEFAULT 0');
+
 // ── User helpers ──────────────────────────────────────────────────────────────
 
 function getUser(userId) {
@@ -78,6 +93,11 @@ function removeKey(userId) {
 function setLastWork(userId) {
   getUser(userId);
   db.prepare('UPDATE users SET last_work = ? WHERE user_id = ?').run(Date.now(), userId);
+}
+
+function setLastDaily(userId) {
+  getUser(userId);
+  db.prepare('UPDATE users SET last_daily = ? WHERE user_id = ?').run(Date.now(), userId);
 }
 
 function addXP(userId, amount) {
@@ -188,7 +208,7 @@ function getInventory(userId) {
 }
 
 module.exports = { 
-  getUser, addKeys, removeKey, setLastWork, addXP, equipItem, getEquippedItem,
+  getUser, addKeys, removeKey, setLastWork, setLastDaily, addXP, equipItem, getEquippedItem,
   createTrade, getTrades, completeTrade, getLeaderboard, getDailyChallenge, updateChallengeProgress,
   addItem, getInventory 
 };
