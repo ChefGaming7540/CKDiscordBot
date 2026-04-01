@@ -20,18 +20,20 @@ for (const file of commandFiles) {
 client.once('ready', async () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
 
-  // Register slash commands
-  const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
-  try {
-    await rest.put(
-      Routes.applicationCommands(client.user.id),
-      { body: commandData }
-    );
-    console.log('✅ Slash commands registered.');
-  } catch (err) {
-    console.error('Failed to register commands:', err);
+  // ── Load Commands ─────────────────────────────────────────────────────────────
+const commandFolders = ['moderation', 'tickets', 'fun', 'utility'];
+
+for (const folder of commandFolders) {
+  const folderPath = join(__dirname, 'commands', folder);
+
+  for (const file of files) {
+    const command = await import(join(folderPath, file));
+    if (command.data && command.execute) {
+      client.commands.set(command.data.name, command);
+      console.log(`  ✔ Loaded command: /${command.data.name}`);
+    }
   }
-});
+}
 
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
@@ -44,6 +46,7 @@ client.on('interactionCreate', async interaction => {
     const msg = { content: '❌ An error occurred.', ephemeral: true };
     interaction.replied ? interaction.followUp(msg) : interaction.reply(msg);
   }
+});
 });
 
 client.login(process.env.BOT_TOKEN);
