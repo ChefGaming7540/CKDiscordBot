@@ -35,37 +35,38 @@ const UNUSUAL_EFFECTS = [
 // ── Your items ────────────────────────────────────────────────────────────────
 // Add / remove items freely. Each item needs a `name` and `rarity`.
 // Unusual items will automatically get a random effect assigned on drop.
+// Now includes effects for usability.
 const ITEMS = [
   // Common
-  { name: 'Rusty Sword',        rarity: 'Common'    },
-  { name: 'Wooden Shield',      rarity: 'Common'    },
-  { name: 'Leather Boots',      rarity: 'Common'    },
-  { name: 'Tattered Cape',      rarity: 'Common'    },
-  { name: 'Iron Dagger',        rarity: 'Common'    },
-  { name: 'Cloth Hood',         rarity: 'Common'    },
+  { name: 'Rusty Sword',        rarity: 'Common',    effect: 'work_boost_5' },
+  { name: 'Wooden Shield',      rarity: 'Common',    effect: 'defense_10' },
+  { name: 'Leather Boots',      rarity: 'Common',    effect: 'speed_5' },
+  { name: 'Tattered Cape',      rarity: 'Common',    effect: 'luck_2' },
+  { name: 'Iron Dagger',        rarity: 'Common',    effect: 'attack_5' },
+  { name: 'Cloth Hood',         rarity: 'Common',    effect: 'stealth_5' },
 
   // Uncommon
-  { name: 'Steel Gauntlets',    rarity: 'Uncommon'  },
-  { name: 'Shadow Cloak',       rarity: 'Uncommon'  },
-  { name: 'Enchanted Bow',      rarity: 'Uncommon'  },
-  { name: 'Mithril Ring',       rarity: 'Uncommon'  },
-  { name: 'Hex Staff',          rarity: 'Uncommon'  },
+  { name: 'Steel Gauntlets',    rarity: 'Uncommon',  effect: 'work_boost_10' },
+  { name: 'Shadow Cloak',       rarity: 'Uncommon',  effect: 'stealth_10' },
+  { name: 'Enchanted Bow',      rarity: 'Uncommon',  effect: 'attack_10' },
+  { name: 'Mithril Ring',       rarity: 'Uncommon',  effect: 'luck_5' },
+  { name: 'Hex Staff',          rarity: 'Uncommon',  effect: 'magic_10' },
 
   // Rare
-  { name: 'Dragonbone Axe',     rarity: 'Rare'      },
-  { name: 'Phantom Blade',      rarity: 'Rare'      },
-  { name: 'Cursed Amulet',      rarity: 'Rare'      },
-  { name: 'Voidweave Armor',    rarity: 'Rare'      },
+  { name: 'Dragonbone Axe',     rarity: 'Rare',      effect: 'work_boost_20' },
+  { name: 'Phantom Blade',      rarity: 'Rare',      effect: 'attack_20' },
+  { name: 'Cursed Amulet',      rarity: 'Rare',      effect: 'luck_10' },
+  { name: 'Voidweave Armor',    rarity: 'Rare',      effect: 'defense_20' },
 
   // Legendary
-  { name: 'Godslayer Sword',    rarity: 'Legendary' },
-  { name: 'Eternal Shield',     rarity: 'Legendary' },
-  { name: 'Crown of Ages',      rarity: 'Legendary' },
+  { name: 'Godslayer Sword',    rarity: 'Legendary', effect: 'work_boost_50' },
+  { name: 'Eternal Shield',     rarity: 'Legendary', effect: 'defense_50' },
+  { name: 'Crown of Ages',      rarity: 'Legendary', effect: 'luck_20' },
 
   // Unusual (effect applied at roll-time)
-  { name: 'Rustling Hat',       rarity: 'Unusual'   },
-  { name: 'Phantom Fedora',     rarity: 'Unusual'   },
-  { name: 'Glowing Helm',       rarity: 'Unusual'   },
+  { name: 'Rustling Hat',       rarity: 'Unusual',   effect: 'random' },
+  { name: 'Phantom Fedora',     rarity: 'Unusual',   effect: 'random' },
+  { name: 'Glowing Helm',       rarity: 'Unusual',   effect: 'random' },
 ];
 
 // ── Roll logic ────────────────────────────────────────────────────────────────
@@ -120,4 +121,24 @@ function openCrate() {
   return result;
 }
 
-module.exports = { openCrate, RARITIES, ITEMS, UNUSUAL_EFFECTS };
+/**
+ * Calculate bonus from equipped item effect.
+ * Returns: { workBoost: number, luck: number, etc. }
+ */
+function getItemBonus(effect) {
+  if (!effect) return {};
+  const bonuses = {};
+  if (effect.startsWith('work_boost_')) {
+    bonuses.workBoost = parseInt(effect.split('_')[2]);
+  } else if (effect.startsWith('luck_')) {
+    bonuses.luck = parseInt(effect.split('_')[1]);
+  } else if (effect === 'random') {
+    // Random bonus for unusual
+    const types = ['workBoost', 'luck'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    bonuses[type] = Math.floor(Math.random() * 20) + 10;
+  }
+  return bonuses;
+}
+
+module.exports = { openCrate, RARITIES, ITEMS, UNUSUAL_EFFECTS, getItemBonus };

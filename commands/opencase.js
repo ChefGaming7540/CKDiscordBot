@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { getUser, removeKey, addItem } = require('../database');
+const { getUser, removeKey, addItem, addXP, updateChallengeProgress } = require('../database');
 const { openCrate } = require('../items');
 
 module.exports = {
@@ -22,6 +22,8 @@ module.exports = {
     removeKey(userId);
     const item = openCrate();
     addItem(userId, item);
+    addXP(userId, 5); // 5 XP per open
+    updateChallengeProgress(userId, 'open_crate');
 
     const { rarityConfig, name, rarity, effect } = item;
     const isUnusual = rarity === 'Unusual';
@@ -38,7 +40,8 @@ module.exports = {
       .addFields(
         { name: 'Rarity',  value: rarityConfig.label,            inline: true },
         { name: 'Keys Left', value: `${user.keys - 1} 🔑`,       inline: true },
-        { name: 'Total Opens', value: `${user.total_opens + 1}`, inline: true }
+        { name: 'Total Opens', value: `${user.total_opens + 1}`, inline: true },
+        { name: 'XP Gained', value: '+5', inline: true },
       )
       .setFooter({ text: `Opened by ${interaction.user.username}` })
       .setTimestamp();

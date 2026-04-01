@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { getUser, getInventory } = require('../database');
+const { getUser, getInventory, getEquippedItem } = require('../database');
 const { RARITIES } = require('../items');
 
 const PAGE_SIZE = 10;
@@ -19,6 +19,7 @@ module.exports = {
     const page   = (interaction.options.getInteger('page') ?? 1) - 1;
     const user   = getUser(userId);
     const items  = getInventory(userId);
+    const equipped = getEquippedItem(userId);
 
     if (!items.length) {
       return interaction.reply({
@@ -45,7 +46,8 @@ module.exports = {
     const itemLines = slice.map((item, i) => {
       const cfg    = RARITIES[item.rarity] ?? {};
       const effect = item.effect ? `*(${item.effect})* ` : '';
-      return `\`${clampedPage * PAGE_SIZE + i + 1}.\` ${cfg.emoji ?? '❓'} ${effect}**${item.item_name}** — ${item.rarity}`;
+      const eq = item.equipped ? ' ⚔️' : '';
+      return `\`${clampedPage * PAGE_SIZE + i + 1}.\` ${cfg.emoji ?? '❓'} ${effect}**${item.item_name}** — ${item.rarity}${eq}`;
     });
 
     const embed = new EmbedBuilder()
@@ -54,9 +56,11 @@ module.exports = {
       .setDescription(itemLines.join('\n'))
       .addFields(
         { name: 'Collection Summary', value: rarityLine || 'None', inline: false },
+        { name: 'Equipped Item', value: equipped ? `${equipped.item_name} (${equipped.effect})` : 'None', inline: true },
         { name: 'Total Items',  value: `${items.length}`,    inline: true },
         { name: 'Keys',         value: `${user.keys} 🔑`,    inline: true },
         { name: 'Total Opens',  value: `${user.total_opens}`, inline: true },
+        { name: 'Level',        value: `${user.level}`,      inline: true },
       )
       .setFooter({ text: `Page ${clampedPage + 1} of ${totalPages}` })
       .setTimestamp();
