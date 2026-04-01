@@ -69,20 +69,23 @@ module.exports = {
     const num2 = Math.floor(Math.random() * 10) + 1;
     const answer = num1 + num2;
 
-    await interaction.reply({
-      content: `🧮 Quick math: What is ${num1} + ${num2}? **Reply with just the number!** You have 10 seconds!`,
-      ephemeral: true,
+    const questionMessage = await interaction.reply({
+      content: `🧮 Quick math: What is ${num1} + ${num2}? **Reply to this message with just the number!** You have 10 seconds!`,
+      ephemeral: false,
     });
 
-    const filter = (m) => m.author.id === userId;
+    const filter = (m) => m.author.id === userId && m.reference?.messageId === questionMessage.id;
+    try {
+      const collected = await interaction.channel.awaitMessages({ filter, max: 1, time: 10000, errors: ['time'] });
+      const userAnswer = parseInt(collected.first().content);
     try {
       const collected = await interaction.channel.awaitMessages({ filter, max: 1, time: 10000, errors: ['time'] });
       const userAnswer = parseInt(collected.first().content);
       if (userAnswer !== answer) {
-        return interaction.editReply('❌ Wrong answer! Try again later.');
+        return interaction.followUp({ content: '❌ Wrong answer! Try again later.', ephemeral: true });
       }
     } catch {
-      return interaction.editReply('⏰ Time\'s up! Try again later.');
+      return interaction.followUp({ content: '⏰ Time\'s up! Try again later.', ephemeral: true });
     }
 
     // Calculate earnings with bonus
