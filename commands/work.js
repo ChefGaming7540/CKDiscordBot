@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { getUser, addKeys, setLastWork, addXP, updateChallengeProgress, getEquippedItem } = require('../database');
+const { getUser, addKeys, addCoins, setLastWork, addXP, updateChallengeProgress, getEquippedItem } = require('../database');
 const { getItemBonus } = require('../items');
 
 // Config
@@ -96,6 +96,7 @@ module.exports = {
     const earned = Math.floor(baseEarned * (1 + (bonus.workBoost || 0) / 100));
 
     addKeys(userId, earned);
+    addCoins(userId, Math.floor(job.xp / 2) + 5); // coins reward: base
     addXP(userId, job.xp);
     setLastWork(userId);
     updateChallengeProgress(userId, 'work');

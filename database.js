@@ -18,6 +18,8 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     user_id       TEXT PRIMARY KEY,
     keys          INTEGER NOT NULL DEFAULT 0,
+    coins         INTEGER NOT NULL DEFAULT 100,
+    season_xp     INTEGER NOT NULL DEFAULT 0,
     total_opens   INTEGER NOT NULL DEFAULT 0,
     last_work     INTEGER NOT NULL DEFAULT 0,
     xp            INTEGER NOT NULL DEFAULT 0,
@@ -63,6 +65,8 @@ db.exec(`
 ensureColumn('users', 'xp', 'INTEGER NOT NULL DEFAULT 0');
 ensureColumn('users', 'level', 'INTEGER NOT NULL DEFAULT 1');
 ensureColumn('users', 'equipped_item', 'INTEGER');
+ensureColumn('users', 'coins', 'INTEGER NOT NULL DEFAULT 100');
+ensureColumn('users', 'season_xp', 'INTEGER NOT NULL DEFAULT 0');
 ensureColumn('users', 'streak', 'INTEGER NOT NULL DEFAULT 0');
 ensureColumn('users', 'last_daily', 'INTEGER NOT NULL DEFAULT 0');
 ensureColumn('inventory', 'equipped', 'INTEGER NOT NULL DEFAULT 0');
@@ -99,10 +103,31 @@ function setLastDaily(userId) {
   getUser(userId);
   db.prepare('UPDATE users SET last_daily = ? WHERE user_id = ?').run(Date.now(), userId);
 }
+function addSeasonXP(userId, amount) {
+  getUser(userId);
+  db.prepare('UPDATE users SET season_xp = season_xp + ? WHERE user_id = ?').run(amount, userId);
+}
+
+function getSeasonLevel(userId) {
+  const user = getUser(userId);
+  return Math.floor(user.season_xp / 200) + 1; // 200 season XP per level
+}
+function addCoins(userId, amount) {
+  getUser(userId);
+  db.prepare('UPDATE users SET coins = coins + ? WHERE user_id = ?').run(amount, userId);
+}
+
+function removeCoins(userId, amount) {
+  const user = getUser(userId);
+  if (user.coins < amount) return false;
+  db.prepare('UPDATE users SET coins = coins - ? WHERE user_id = ?').run(amount, userId);
+  return true;
+}
 
 function addXP(userId, amount) {
   getUser(userId);
   db.prepare('UPDATE users SET xp = xp + ? WHERE user_id = ?').run(amount, userId);
+  addSeasonXP(userId, amount);
   // Level up logic
   const user = getUser(userId);
   const newLevel = Math.floor(user.xp / 100) + 1; // 100 XP per level
@@ -152,11 +177,19 @@ function completeTrade(tradeId) {
 
 function getLeaderboard() {
   return db.prepare(`
-    SELECT user_id, keys, total_opens, level, xp
+    SELECT user_id, keys, total_opens, level, xp, season_xp
     FROM users
     ORDER BY level DESC, xp DESC
     LIMIT 10
   `).all();
+}
+
+function getSeasonPassProgress(userId) {
+  const user = getUser(userId);
+  const seasonLevel = getSeasonLevel(userId);
+  const seasonNext = (seasonLevel * 200);
+  const seasonToNext = seasonNext - user.season_xp;
+  return { season_xp: user.season_xp, season_level: seasonLevel, to_next_level: seasonToNext };
 }
 
 function getDailyChallenge(userId) {
@@ -207,8 +240,9 @@ function getInventory(userId) {
   `).all(userId);
 }
 
-module.exports = { 
-  getUser, addKeys, removeKey, setLastWork, setLastDaily, addXP, equipItem, getEquippedItem,
+module.exports = {
+  getUser, addKeys, removeKey, setLastWork, setLastDaily, addXP, addSeasonXP, getSeasonLevel, getSeasonPassProgress,
+  equipItem, getEquippedItem, addCoins, removeCoins,
   createTrade, getTrades, completeTrade, getLeaderboard, getDailyChallenge, updateChallengeProgress,
-  addItem, getInventory 
+  addItem, getInventory
 };
