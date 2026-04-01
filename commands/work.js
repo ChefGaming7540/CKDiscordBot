@@ -86,7 +86,7 @@ module.exports = {
 
     const userAnswer = parseInt(collected.first().content);
     if (Number.isNaN(userAnswer) || userAnswer !== answer) {
-      return questionMessage.edit('❌ Incorrect answer. Work failed this time. Try again in another cooldown.');
+      return interaction.followUp({ content: '❌ Incorrect answer. Work failed this time. Try again in another cooldown.', ephemeral: true });
     }
 
     // success: award user
@@ -116,6 +116,6 @@ module.exports = {
       .setFooter({ text: `Next work in ${job.cooldown / 3600000}h.` })
       .setTimestamp();
 
-    return questionMessage.edit({ content: null, embeds: [embed] });
+    return interaction.followUp({ embeds: [embed] });
   },
 };
