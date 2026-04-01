@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { getUser, addKeys, setLastWork } = require('../database');
+const { getUser, addKeys, setLastWork, addXP, updateChallengeProgress, getEquippedItem } = require('../database');
+const { getItemBonus } = require('../items');
 
 // Config
 const JOBS = {
@@ -75,9 +76,6 @@ module.exports = {
     });
 
     const filter = (m) => m.author.id === userId && m.reference?.messageId === questionMessage.id;
-    try {
-      const collected = await interaction.channel.awaitMessages({ filter, max: 1, time: 10000, errors: ['time'] });
-      const userAnswer = parseInt(collected.first().content);
     try {
       const collected = await interaction.channel.awaitMessages({ filter, max: 1, time: 10000, errors: ['time'] });
       const userAnswer = parseInt(collected.first().content);
