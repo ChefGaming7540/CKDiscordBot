@@ -47,7 +47,7 @@ module.exports = {
       const cfg    = RARITIES[item.rarity] ?? {};
       const effect = item.effect ? `*(${item.effect})* ` : '';
       const eq = item.equipped ? ' ⚔️' : '';
-      return `\`${clampedPage * PAGE_SIZE + i + 1}.\` ${cfg.emoji ?? '❓'} ${effect}**${item.item_name}** — ${item.rarity}${eq}`;
+      return `\`#${item.id}\` \`${clampedPage * PAGE_SIZE + i + 1}.\` ${cfg.emoji ?? '❓'} ${effect}**${item.item_name}** — ${item.rarity}${eq}`;
     });
 
     const embed = new EmbedBuilder()
