@@ -17,7 +17,7 @@ module.exports = {
       .setColor(0xffd700)
       .setTitle('🏆 Leaderboard')
       .setDescription(
-        leaders.map((u, i) => `${i + 1}. <@${u.user_id}> - Lv.${u.level} (${u.xp} XP, ${u.total_opens} opens)`).join('\n')
+        leaders.map((u, i) => `${i + 1}. <@${u.user_id}> - Lv.${u.level} (${u.xp} XP, ${u.crates} 📦, ${u.total_opens} opens)`).join('\n')
       );
 
     return interaction.reply({ embeds: [embed], ephemeral: true });

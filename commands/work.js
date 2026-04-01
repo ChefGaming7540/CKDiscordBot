@@ -1,12 +1,12 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { getUser, addKeys, addCoins, setLastWork, addXP, updateChallengeProgress, getEquippedItem } = require('../database');
+const { getUser, addKeys, addCoins, setLastWork, addXP, updateChallengeProgress, getEquippedItem, addCrates } = require('../database');
 const { getItemBonus } = require('../items');
 
 // Config
 const JOBS = {
-  dockworker: { name: 'Dockworker', minKeys: 1, maxKeys: 2, xp: 10, cooldown: 60 * 60 * 1000 },
-  miner: { name: 'Miner', minKeys: 2, maxKeys: 4, xp: 15, cooldown: 2 * 60 * 60 * 1000, levelReq: 2 },
-  guard: { name: 'Guard', minKeys: 3, maxKeys: 5, xp: 20, cooldown: 3 * 60 * 60 * 1000, levelReq: 5 },
+  dockworker: { name: 'Dockworker', minCoins: 10, maxCoins: 20, xp: 10, cooldown: 60 * 60 * 1000 },
+  miner: { name: 'Miner', minCoins: 20, maxCoins: 40, xp: 15, cooldown: 2 * 60 * 60 * 1000, levelReq: 2 },
+  guard: { name: 'Guard', minCoins: 30, maxCoins: 50, xp: 20, cooldown: 3 * 60 * 60 * 1000, levelReq: 5 },
 };
 const FLAVOR_TEXTS = {
   dockworker: [
@@ -34,9 +34,9 @@ module.exports = {
       opt.setName('job')
         .setDescription('Job to perform (default: dockworker)')
         .addChoices(
-          { name: 'Dockworker (1-2 keys, 1h)', value: 'dockworker' },
-          { name: 'Miner (2-4 keys, 2h, Lv.2+)', value: 'miner' },
-          { name: 'Guard (3-5 keys, 3h, Lv.5+)', value: 'guard' },
+          { name: 'Dockworker (10-20 coins, 1h)', value: 'dockworker' },
+          { name: 'Miner (20-40 coins, 2h, Lv.2+)', value: 'miner' },
+          { name: 'Guard (30-50 coins, 3h, Lv.5+)', value: 'guard' },
         )
     ),
 
@@ -92,10 +92,10 @@ module.exports = {
     // success: award user
     const equipped = getEquippedItem(userId);
     const bonus = equipped ? getItemBonus(equipped.effect) : {};
-    const baseEarned = Math.floor(Math.random() * (job.maxKeys - job.minKeys + 1)) + job.minKeys;
+    const baseEarned = Math.floor(Math.random() * (job.maxCoins - job.minCoins + 1)) + job.minCoins;
     const earned = Math.floor(baseEarned * (1 + (bonus.workBoost || 0) / 100));
 
-    addKeys(userId, earned);
+    addCoins(userId, earned); // coins for work reward
     addCoins(userId, Math.floor(job.xp / 2) + 5); // coins reward: base
     addXP(userId, job.xp);
     setLastWork(userId);
@@ -109,9 +109,9 @@ module.exports = {
       .setTitle(`💼 ${job.name} Complete!`)
       .setDescription(`*${flavor}*\n\n🧠 You answered correctly!`)
       .addFields(
-        { name: 'Earned', value: `+${earned} 🔑${bonus.workBoost ? ` (+${bonus.workBoost}% bonus)` : ''}`, inline: true },
+        { name: 'Earned', value: `+${earned} 💰${bonus.workBoost ? ` (+${bonus.workBoost}% bonus)` : ''}`, inline: true },
         { name: 'XP Gained', value: `+${job.xp}`, inline: true },
-        { name: 'Total Keys', value: `${updated.keys} 🔑`, inline: true },
+        { name: 'Total Coins', value: `${updated.coins} 💰`, inline: true },
         { name: 'Level', value: `${updated.level}`, inline: true },
       )
       .setFooter({ text: `Next work in ${job.cooldown / 3600000}h.` })

@@ -18,6 +18,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     user_id       TEXT PRIMARY KEY,
     keys          INTEGER NOT NULL DEFAULT 0,
+    crates        INTEGER NOT NULL DEFAULT 0,
     coins         INTEGER NOT NULL DEFAULT 100,
     season_xp     INTEGER NOT NULL DEFAULT 0,
     total_opens   INTEGER NOT NULL DEFAULT 0,
@@ -67,6 +68,7 @@ ensureColumn('users', 'level', 'INTEGER NOT NULL DEFAULT 1');
 ensureColumn('users', 'equipped_item', 'INTEGER');
 ensureColumn('users', 'coins', 'INTEGER NOT NULL DEFAULT 100');
 ensureColumn('users', 'season_xp', 'INTEGER NOT NULL DEFAULT 0');
+ensureColumn('users', 'crates', 'INTEGER NOT NULL DEFAULT 0');
 ensureColumn('users', 'streak', 'INTEGER NOT NULL DEFAULT 0');
 ensureColumn('users', 'last_daily', 'INTEGER NOT NULL DEFAULT 0');
 ensureColumn('inventory', 'equipped', 'INTEGER NOT NULL DEFAULT 0');
@@ -87,10 +89,15 @@ function addKeys(userId, amount) {
   db.prepare('UPDATE users SET keys = keys + ? WHERE user_id = ?').run(amount, userId);
 }
 
-function removeKey(userId) {
+function addCrates(userId, amount) {
+  getUser(userId);
+  db.prepare('UPDATE users SET crates = crates + ? WHERE user_id = ?').run(amount, userId);
+}
+
+function removeCrate(userId) {
   const user = getUser(userId);
-  if (user.keys < 1) return false;
-  db.prepare('UPDATE users SET keys = keys - 1, total_opens = total_opens + 1 WHERE user_id = ?').run(userId);
+  if (user.crates < 1) return false;
+  db.prepare('UPDATE users SET crates = crates - 1, total_opens = total_opens + 1 WHERE user_id = ?').run(userId);
   return true;
 }
 
@@ -177,7 +184,7 @@ function completeTrade(tradeId) {
 
 function getLeaderboard() {
   return db.prepare(`
-    SELECT user_id, keys, total_opens, level, xp, season_xp
+    SELECT user_id, crates, total_opens, level, xp, season_xp
     FROM users
     ORDER BY level DESC, xp DESC
     LIMIT 10
@@ -240,9 +247,9 @@ function getInventory(userId) {
   `).all(userId);
 }
 
-module.exports = {
+module.exports = { 
   getUser, addKeys, removeKey, setLastWork, setLastDaily, addXP, addSeasonXP, getSeasonLevel, getSeasonPassProgress,
-  equipItem, getEquippedItem, addCoins, removeCoins,
+  equipItem, getEquippedItem, addCoins, removeCoins, addCrates, removeCrate,
   createTrade, getTrades, completeTrade, getLeaderboard, getDailyChallenge, updateChallengeProgress,
-  addItem, getInventory
+  addItem, getInventory 
 };

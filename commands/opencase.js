@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { getUser, removeKey, addItem, addXP, updateChallengeProgress } = require('../database');
+const { getUser, removeCrate, addItem, addXP, updateChallengeProgress } = require('../database');
 const { openCrate } = require('../items');
 
 module.exports = {
@@ -11,15 +11,15 @@ module.exports = {
     const userId = interaction.user.id;
     const user   = getUser(userId);
 
-    if (user.keys < 1) {
+    if (user.crates < 1) {
       return interaction.reply({
-        content: '🔑 You don\'t have any keys! Earn one with `/work` or ask an admin for one.',
+        content: '📦 You don\'t have any crates! Earn one with `/work` or buy one from the shop.',
         ephemeral: true,
       });
     }
 
-    // Deduct key and roll item
-    removeKey(userId);
+    // Deduct crate and roll item
+    removeCrate(userId);
     const item = openCrate();
     addItem(userId, item);
     addXP(userId, 5); // 5 XP per open
@@ -39,7 +39,7 @@ module.exports = {
       )
       .addFields(
         { name: 'Rarity',  value: rarityConfig.label,            inline: true },
-        { name: 'Keys Left', value: `${user.keys - 1} 🔑`,       inline: true },
+        { name: 'Crates Left', value: `${user.crates - 1} 📦`,       inline: true },
         { name: 'Total Opens', value: `${user.total_opens + 1}`, inline: true },
         { name: 'XP Gained', value: '+5', inline: true },
       )
