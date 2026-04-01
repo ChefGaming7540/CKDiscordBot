@@ -39,23 +39,20 @@ for (const file of commandFiles) {
 console.log(`\n📦 ${client.commands.size} command(s) loaded.\n`);
 
 // ── Events ────────────────────────────────────────────────────────────────────
-client.once('clientReady', async () => {
-  console.log(`✅ Logged in as ${client.user.tag}`);
-  console.log(`🌐 Serving ${client.guilds.cache.size} guild(s)\n`);
+const eventsPath = join(__dirname, 'events');
+const eventFiles = readdirSync(eventsPath).filter(f => f.endsWith('.js'));
 
-  // Register slash commands globally
-  const rest = new REST({ version: '10' }).setToken(process.env.BOT_TOKEN);
-  try {
-    console.log('⏳ Registering slash commands...');
-    await rest.put(
-      Routes.applicationCommands(client.user.id),
-      { body: commandData }
-    );
-    console.log('✅ Slash commands registered.\n');
-  } catch (err) {
-    console.error('✖ Failed to register slash commands:', err.message);
+for (const file of eventFiles) {
+  const event = await import(join(eventsPath, file));
+  const handler = (...args) => event.default.execute(...args);
+
+  if (event.default.once) {
+    client.once(event.default.name, handler);
+  } else {
+    client.on(event.default.name, handler);
   }
-});
+  console.log(`  ✔ Registered event: ${event.default.name}`);
+}
 
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
