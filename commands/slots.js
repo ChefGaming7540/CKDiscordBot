@@ -12,7 +12,7 @@ const SYMBOLS = [
   { emoji: '🔔', label: 'Bell',     weight: 12, payout: 3   },
   { emoji: '💎', label: 'Diamond',  weight: 8,  payout: 5   },
   { emoji: '🌟', label: 'Star',     weight: 4,  payout: 10  },
-  { emoji: '🎁', label: 'Crate',    weight: 1,  payout: 0   }, // awards a free item!
+  { emoji: '🎁', label: 'Crate',    weight: 2,  payout: 0   }, // awards a free item!
 ];
 
 // Two-of-a-kind pays back the key cost (net 0)
