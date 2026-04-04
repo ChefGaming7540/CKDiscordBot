@@ -11,7 +11,7 @@ export default {
     console.log(`📡 Serving ${client.guilds.cache.size} guild(s)\n`);
 
     client.user.setPresence({
-      activities: [{ name: "Chef's Kitchen 🍳", type: ActivityType.Watching }],
+      activities: [{ name: "Crates being openned!", type: ActivityType.Watching }],
       status: 'idle',
     })
   }
