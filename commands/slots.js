@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { getUser, addKeys, removeKey } = require('../database');
+const { getUser, addKeys, removeKeys } = require('../database');
 const { addItem, openCrate } = require('../items');
 
 // ── Slot symbols ──────────────────────────────────────────────────────────────
@@ -89,7 +89,7 @@ module.exports = {
     }
 
     // Deduct all bet keys up front
-    for (let i = 0; i < spins; i++) removeKey(userId);
+    removeKeys(userId, spins);
 
     // ── Spin animation ──
     const spinEmoji = ['🎰', '🎲', '🎳'];
