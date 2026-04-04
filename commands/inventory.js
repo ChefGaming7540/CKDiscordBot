@@ -59,6 +59,7 @@ module.exports = {
         { name: 'Equipped Item', value: equipped ? `${equipped.item_name} (${equipped.effect})` : 'None', inline: true },
         { name: 'Total Items',  value: `${items.length}`,    inline: true },
         { name: 'Keys',         value: `${user.keys} 🔑`,    inline: true },
+        { name: 'Crates',       value: `${user.crates} 📦`,  inline: true },
         { name: 'Total Opens',  value: `${user.total_opens}`, inline: true },
         { name: 'Level',        value: `${user.level}`,      inline: true },
       )
