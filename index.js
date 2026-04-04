@@ -43,7 +43,7 @@ const eventsPath = join(__dirname, 'events');
 const eventFiles = readdirSync(eventsPath).filter(f => f.endsWith('.js'));
 
 for (const file of eventFiles) {
-  const event = await import(join(eventsPath, file));
+  const event = import(join(eventsPath, file));
   const handler = (...args) => event.default.execute(...args);
 
   if (event.default.once) {
